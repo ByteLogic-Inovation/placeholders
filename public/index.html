@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Placeholder API Documentation</title>
+
+    <!-- Alpine.js -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- Bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+
+    <!-- Remix Icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css"
+    />
+
+    <style>
+      body {
+        background: #f8f9fa;
+      }
+      .container {
+        max-width: 900px;
+        margin-top: 50px;
+      }
+      .card {
+        border: none;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      code {
+        background: #e9ecef;
+        padding: 10px;
+        display: block;
+        border-radius: 5px;
+      }
+      .note {
+        font-size: 0.9em;
+        color: #6c757d;
+      }
+      .preview-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+      .preview img {
+        max-width: 100%;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" x-data="placeholderApi">
+      <div class="card p-4">
+        <h1 class="text-center text-primary">📷 Placeholder API</h1>
+        <p class="text-center text-muted">
+          Generate placeholder images dynamically with custom dimensions,
+          colors, and text.
+        </p>
+        <p class="note text-center">
+          You can use <b>"random"</b> for width, height, color, background, or
+          text.
+        </p>
+
+        <div class="row g-3">
+          <!-- Left Side - Form & Code -->
+          <div class="col-md-6">
+            <label class="form-label">Width</label>
+            <input
+              type="text"
+              x-model="width"
+              class="form-control"
+              placeholder="300 or random"
+            />
+
+            <label class="form-label mt-2">Height</label>
+            <input
+              type="text"
+              x-model="height"
+              class="form-control"
+              placeholder="200 or random"
+            />
+
+            <label class="form-label mt-2">Text (optional)</label>
+            <input
+              type="text"
+              x-model="text"
+              class="form-control"
+              placeholder="Placeholder or random"
+            />
+
+            <label class="form-label mt-2">Text Color</label>
+            <input
+              type="text"
+              x-model="color"
+              class="form-control"
+              placeholder="black, #ff0000, rgb(0,0,255) or random"
+            />
+
+            <label class="form-label mt-2">Background Color</label>
+            <input
+              type="text"
+              x-model="background"
+              class="form-control"
+              placeholder="white, #000000, rgb(255,255,0) or random"
+            />
+
+            <label class="form-label mt-2">Format</label>
+            <select x-model="format" class="form-select">
+              <option>png</option>
+              <option>jpg</option>
+              <option>jpeg</option>
+              <option>gif</option>
+              <option>webp</option>
+              <option>svg</option>
+            </select>
+
+            <div class="text-center mt-3">
+              <button class="btn btn-primary w-100" @click="generateUrl">
+                Generate Image
+              </button>
+            </div>
+
+            <!-- Generated URL with Copy Button -->
+            <div class="mt-3">
+              <label class="form-label">Generated URL</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  x-model="imageUrl"
+                  readonly
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  @click="copyToClipboard(imageUrl, $event)"
+                >
+                  <i class="ri-file-copy-line"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Example Implementation with Copy Button -->
+            <div class="mt-3">
+              <label class="form-label">Example Usage</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  x-model="exampleCode"
+                  readonly
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  @click="copyToClipboard(exampleCode, $event)"
+                >
+                  <i class="ri-file-copy-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Side - Preview -->
+          <div class="col-md-6 preview-container">
+            <div class="preview text-center">
+              <img
+                :src="imageUrl || randomPlaceholder"
+                alt="Generated Placeholder Image"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('placeholderApi', () => ({
+          width: '300',
+          height: '300',
+          text: 'Placeholder',
+          color: '#F16767',
+          background: '#FFF085',
+          format: 'png',
+          imageUrl: '',
+          exampleCode: '',
+          randomPlaceholder: `/random/random.png?text=Random&color=random&background=random`, // Default random image
+
+          generateUrl() {
+            this.imageUrl = `${window.location.origin}/${this.width}/${
+              this.height
+            }.${this.format}?text=${encodeURIComponent(
+              this.text
+            )}&color=${encodeURIComponent(
+              this.color
+            )}&background=${encodeURIComponent(this.background)}`;
+            this.exampleCode = `<img src="${this.imageUrl}" alt="Placeholder">`;
+          },
+
+          copyToClipboard(text, event) {
+            navigator.clipboard.writeText(text).then(() => {
+              const btn = event.target;
+              btn.innerHTML = '<i class="ri-check-line"></i>';
+              setTimeout(
+                () => (btn.innerHTML = '<i class="ri-file-copy-line"></i>'),
+                1500
+              );
+            });
+          },
+        }));
+      });
+    </script>
+  </body>
+</html>
